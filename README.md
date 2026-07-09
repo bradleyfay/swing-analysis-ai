@@ -20,6 +20,11 @@ feedback that used to require a lab — and gives it away.
 **Read the full vision → [`VISION.md`](VISION.md)** (or open the rendered
 [`docs/vision.html`](docs/vision.html) in a browser).
 
+**The research behind the feasibility call → [`docs/research/`](docs/research/)** — a cited
+dossier (OnForm teardown, the proprietary-moat question, open-source pose models and their
+licenses, swing biomechanics, reference datasets, closest existing products, and the AI
+coaching-feedback architecture). Read this before technical design.
+
 ## Why this exists
 
 Youth sports is being quietly monetized into two tiers: families who can spend put their
