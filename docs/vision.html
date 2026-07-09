@@ -1,0 +1,712 @@
+<title>Sandlot — Swing Analysis for Everybody's Kid</title>
+<style>
+  :root {
+    /* Day game — deliberately greenish off-white, not cream */
+    --ground: #ECEFE7;
+    --surface: #F6F8F1;
+    --surface-2: #E4E9DC;
+    --ink: #16211B;
+    --muted: #566259;
+    --line: #D2D9C8;
+    --clay: #B0552E;      /* infield clay — emotional accent */
+    --clay-soft: rgba(176, 85, 46, 0.10);
+    --mint: #2C7A66;      /* measurement accent, quiet */
+    --mint-soft: rgba(44, 122, 102, 0.10);
+    --shadow: 0 1px 2px rgba(22,33,27,.06), 0 8px 30px rgba(22,33,27,.05);
+
+    --font-serif: Georgia, "Iowan Old Style", "Times New Roman", serif;
+    --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+
+    --measure: 40rem;
+    --gutter: clamp(1.25rem, 5vw, 3rem);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      /* Night game under the lights */
+      --ground: #0D1411;
+      --surface: #131C17;
+      --surface-2: #182420;
+      --ink: #E9EFE7;
+      --muted: #93A398;
+      --line: #24312A;
+      --clay: #D9814E;
+      --clay-soft: rgba(217, 129, 78, 0.12);
+      --mint: #74E0B4;
+      --mint-soft: rgba(116, 224, 180, 0.10);
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 18px 50px rgba(0,0,0,.35);
+    }
+  }
+
+  /* Explicit toggle overrides — must beat the media query both directions */
+  :root[data-theme="light"] {
+    --ground: #ECEFE7; --surface: #F6F8F1; --surface-2: #E4E9DC;
+    --ink: #16211B; --muted: #566259; --line: #D2D9C8;
+    --clay: #B0552E; --clay-soft: rgba(176,85,46,.10);
+    --mint: #2C7A66; --mint-soft: rgba(44,122,102,.10);
+    --shadow: 0 1px 2px rgba(22,33,27,.06), 0 8px 30px rgba(22,33,27,.05);
+  }
+  :root[data-theme="dark"] {
+    --ground: #0D1411; --surface: #131C17; --surface-2: #182420;
+    --ink: #E9EFE7; --muted: #93A398; --line: #24312A;
+    --clay: #D9814E; --clay-soft: rgba(217,129,78,.12);
+    --mint: #74E0B4; --mint-soft: rgba(116,224,180,.10);
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 18px 50px rgba(0,0,0,.35);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+
+  .wrap {
+    max-width: var(--measure);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+
+  /* ---- shared type ---- */
+  .eyebrow {
+    font-family: var(--font-sans);
+    font-size: .72rem;
+    font-weight: 650;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--mint);
+    margin: 0 0 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+  }
+  .eyebrow::before {
+    content: "";
+    width: 1.9rem; height: 1px;
+    background: var(--mint);
+    opacity: .6;
+  }
+
+  h2 {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    font-size: clamp(1.7rem, 4.4vw, 2.5rem);
+    line-height: 1.12;
+    letter-spacing: -.01em;
+    text-wrap: balance;
+    margin: 0 0 1.1rem;
+  }
+  h2 em { color: var(--clay); font-style: italic; }
+
+  p { margin: 0 0 1.15rem; max-width: 38rem; }
+  .lead { font-size: 1.12rem; color: var(--ink); }
+  .muted { color: var(--muted); }
+
+  section { padding-block: clamp(3.5rem, 9vw, 6rem); }
+  .divider { border-top: 1px solid var(--line); }
+
+  a { color: var(--clay); text-underline-offset: 3px; }
+
+  /* ---- HERO ---- */
+  .hero {
+    position: relative;
+    min-height: 96vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-block: clamp(3rem, 8vh, 6rem);
+    overflow: hidden;
+  }
+  #swing {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    opacity: .9;
+  }
+  .hero-veil {
+    position: absolute; inset: 0; z-index: 1;
+    background:
+      radial-gradient(120% 80% at 15% 40%, transparent 30%, var(--ground) 82%),
+      linear-gradient(180deg, transparent 55%, var(--ground) 100%);
+    pointer-events: none;
+  }
+  .hero .wrap { position: relative; z-index: 2; }
+
+  .brand {
+    font-family: var(--font-sans);
+    font-weight: 750;
+    font-size: clamp(3.2rem, 13vw, 7rem);
+    line-height: .9;
+    letter-spacing: -.045em;
+    margin: 0 0 .1em;
+  }
+  .brand .dot { color: var(--clay); }
+  .thesis {
+    font-family: var(--font-serif);
+    font-size: clamp(1.35rem, 3.6vw, 2rem);
+    line-height: 1.28;
+    letter-spacing: -.005em;
+    max-width: 22ch;
+    text-wrap: balance;
+    margin: .4em 0 1.4rem;
+  }
+  .thesis em { color: var(--clay); font-style: italic; }
+  .hero-sub { max-width: 34rem; color: var(--muted); font-size: 1.05rem; }
+  .stamp {
+    display: inline-flex; align-items: center; gap: .55rem;
+    font-family: var(--font-mono);
+    font-size: .74rem; letter-spacing: .04em;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    padding: .5rem .8rem;
+    border-radius: 999px;
+    margin-top: 1.6rem;
+    box-shadow: var(--shadow);
+  }
+  .stamp b { color: var(--clay); font-weight: 700; }
+  .pulse {
+    width: .5rem; height: .5rem; border-radius: 50%;
+    background: var(--mint);
+    box-shadow: 0 0 0 0 var(--mint);
+    animation: pulse 2.4s infinite;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 var(--mint-soft); }
+    70% { box-shadow: 0 0 0 .55rem transparent; }
+    100% { box-shadow: 0 0 0 0 transparent; }
+  }
+
+  /* ---- price ledger ---- */
+  .ledger {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-top: 2rem;
+    box-shadow: var(--shadow);
+  }
+  .ledger-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: baseline;
+    gap: 1rem;
+    background: var(--surface);
+    padding: 1rem 1.25rem;
+  }
+  .ledger-row .what { font-size: .98rem; }
+  .ledger-row .what small { display: block; color: var(--muted); font-size: .8rem; }
+  .ledger-row .cost {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    font-size: 1.05rem;
+    color: var(--muted);
+  }
+  .ledger-row.free { background: var(--clay-soft); }
+  .ledger-row.free .cost { color: var(--clay); font-size: 1.4rem; }
+  .ledger-row.free .what { font-weight: 650; }
+
+  /* ---- principles ---- */
+  .principles { list-style: none; padding: 0; margin: 2rem 0 0; display: grid; gap: 0; }
+  .principles li {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1.1rem;
+    padding: 1.35rem 0;
+    border-top: 1px solid var(--line);
+    max-width: none;
+  }
+  .principles li:last-child { border-bottom: 1px solid var(--line); }
+  .principles .k {
+    font-family: var(--font-mono);
+    font-size: .78rem;
+    color: var(--mint);
+    padding-top: .2rem;
+    letter-spacing: .02em;
+  }
+  .principles h3 {
+    margin: 0 0 .3rem;
+    font-family: var(--font-sans);
+    font-weight: 650;
+    font-size: 1.08rem;
+    letter-spacing: -.01em;
+  }
+  .principles p { margin: 0; color: var(--muted); font-size: .96rem; }
+
+  /* ---- access centerpiece ---- */
+  .access {
+    background: var(--surface);
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  .bignum {
+    font-family: var(--font-sans);
+    display: flex; align-items: center; gap: clamp(.8rem,3vw,1.6rem);
+    flex-wrap: wrap;
+    margin: 1.8rem 0 1.4rem;
+  }
+  .bignum .n {
+    font-weight: 750;
+    font-size: clamp(2.6rem, 9vw, 4.5rem);
+    letter-spacing: -.04em;
+    line-height: 1;
+    color: var(--clay);
+  }
+  .bignum .arrow { color: var(--muted); font-size: clamp(1.6rem,5vw,2.4rem); }
+  .bignum .inf {
+    font-weight: 750;
+    font-size: clamp(2.6rem, 9vw, 4.5rem);
+    letter-spacing: -.04em;
+    line-height: 1;
+    color: var(--mint);
+  }
+  .bignum .cap {
+    font-family: var(--font-mono);
+    font-size: .78rem;
+    letter-spacing: .04em;
+    color: var(--muted);
+    max-width: 12rem;
+  }
+
+  /* ---- pipeline ---- */
+  .flow { display: grid; gap: 0; margin-top: 2rem; }
+  .step {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1.3rem;
+    padding: 1.4rem 0;
+    border-top: 1px dashed var(--line);
+    max-width: none;
+  }
+  .step:last-child { border-bottom: 1px dashed var(--line); }
+  .step .idx {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    color: var(--mint);
+    font-size: .85rem;
+    padding-top: .25rem;
+  }
+  .step h3 { margin: 0 0 .3rem; font-size: 1.05rem; font-weight: 650; letter-spacing: -.01em; }
+  .step p { margin: 0; color: var(--muted); font-size: .96rem; }
+  .step .tag {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: .68rem;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--mint);
+    background: var(--mint-soft);
+    border-radius: 5px;
+    padding: .12rem .45rem;
+    margin-top: .55rem;
+  }
+
+  /* ---- phase timeline ---- */
+  .phases {
+    display: grid;
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-top: 2rem;
+    box-shadow: var(--shadow);
+  }
+  .phase {
+    background: var(--surface);
+    padding: 1.15rem 1.3rem;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1.1rem;
+    align-items: start;
+  }
+  .phase .num {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    font-size: .82rem;
+    color: var(--clay);
+    background: var(--clay-soft);
+    width: 2rem; height: 2rem;
+    display: grid; place-items: center;
+    border-radius: 7px;
+    margin-top: .1rem;
+  }
+  .phase h4 {
+    margin: 0 0 .2rem;
+    font-size: 1rem; font-weight: 650; letter-spacing: -.01em;
+  }
+  .phase p { margin: 0; color: var(--muted); font-size: .92rem; max-width: none; }
+
+  /* ---- never ---- */
+  .never { list-style: none; padding: 0; margin: 1.8rem 0 0; display: grid; gap: .9rem; }
+  .never li {
+    display: grid; grid-template-columns: auto 1fr; gap: .9rem; align-items: baseline;
+    max-width: none;
+    font-size: 1rem;
+  }
+  .never .x { color: var(--clay); font-weight: 700; font-family: var(--font-mono); }
+  .never b { font-weight: 650; }
+  .never span.t { color: var(--ink); }
+  .never small { color: var(--muted); display: block; font-size: .88rem; margin-top: .15rem; }
+
+  /* ---- close ---- */
+  .close { text-align: left; }
+  .close h2 { font-size: clamp(2rem, 6vw, 3rem); }
+  .cta-note {
+    font-family: var(--font-mono);
+    font-size: .8rem; color: var(--muted);
+    border-left: 2px solid var(--clay);
+    padding: .3rem 0 .3rem 1rem;
+    margin-top: 1.6rem;
+    max-width: 34rem;
+  }
+
+  footer {
+    border-top: 1px solid var(--line);
+    padding-block: 2.4rem;
+    color: var(--muted);
+    font-size: .82rem;
+    font-family: var(--font-mono);
+    letter-spacing: .02em;
+  }
+  footer .wrap { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+
+  /* reveal */
+  .reveal { opacity: 0; transform: translateY(14px); transition: opacity .7s ease, transform .7s ease; }
+  .reveal.in { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal { opacity: 1; transform: none; transition: none; }
+    .pulse { animation: none; }
+  }
+
+  @media (min-width: 640px) {
+    .phases { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+
+<header class="hero">
+  <canvas id="swing" aria-hidden="true"></canvas>
+  <div class="hero-veil"></div>
+  <div class="wrap">
+    <p class="eyebrow" style="color:var(--clay)">Open-source swing analysis · working name</p>
+    <h1 class="brand">Sandlot<span class="dot">.</span></h1>
+    <p class="thesis">Pro-grade swing analysis that runs on a phone, costs nothing, and belongs to <em>everybody's kid</em>.</p>
+    <p class="hero-sub">The biomechanics that shape million-dollar prospects shouldn't be locked behind million-dollar incomes. Sandlot turns a single video of a baseball swing into the kind of feedback that used to require a lab — and gives it away.</p>
+    <span class="stamp"><span class="pulse"></span> Free forever · Open source · Runs <b>on the device</b> · No subscription</span>
+  </div>
+</header>
+
+<section class="divider">
+  <div class="wrap reveal">
+    <p class="eyebrow">The problem</p>
+    <h2>Talent is evenly distributed. <em>Access isn't.</em></h2>
+    <p class="lead">Genetics don't check your family's tax bracket. But the tools that turn raw talent into real development increasingly do.</p>
+    <p class="muted">Youth sports is being quietly monetized into two tiers. Families who can spend put their kids in front of motion-capture rigs, wearable sensors, and subscription "AI coaches." Everyone else guesses. Over time that gap compounds — not because one pool of kids is more gifted, but because one pool got measured and coached and the other didn't. The end state is a shallower, poorer game for all of us: a competition pool filtered by income instead of ability. That's not just unfair. It's a worse sport.</p>
+    <p>The maddening part: <strong>the technology is no longer what's expensive.</strong> Open-source pose models are free. Modern phones can run them. What's expensive is the monetization wrapped around them.</p>
+
+    <div class="ledger" role="table" aria-label="What swing analysis costs today">
+      <div class="ledger-row" role="row"><span class="what" role="cell">Motion-capture lab session<small>Marker suits, camera rig, a technician</small></span><span class="cost" role="cell">$10,000+</span></div>
+      <div class="ledger-row" role="row"><span class="what" role="cell">Bat sensor + platform<small>Per athlete, plus the phone to read it</small></span><span class="cost" role="cell">~$150</span></div>
+      <div class="ledger-row" role="row"><span class="what" role="cell">Subscription "AI swing" apps<small>Recurring, forever, per season</small></span><span class="cost" role="cell">~$80/mo</span></div>
+      <div class="ledger-row free" role="row"><span class="what" role="cell">Sandlot<small>Open source · on-device · no account required</small></span><span class="cost" role="cell">$0</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="divider">
+  <div class="wrap reveal">
+    <p class="eyebrow">What we won't compromise</p>
+    <h2>Five promises the architecture keeps for us.</h2>
+    <p class="muted">These aren't marketing values. Each one is a technical decision that makes the promise structurally true — not a policy that can be quietly reversed later.</p>
+    <ul class="principles">
+      <li><span class="k">01</span><div><h3>It runs on the device</h3><p>Analysis happens on the phone or laptop you already own. No server means no per-swing cost, no bill that grows as more kids use it, and nothing to shut down when the grant runs out.</p></div></li>
+      <li><span class="k">02</span><div><h3>Kids' video stays on kids' phones</h3><p>Because nothing has to leave the device to be analyzed, minors' footage never has to be uploaded, harvested, or sold. On-device isn't only cheaper — it's the privacy model children deserve.</p></div></li>
+      <li><span class="k">03</span><div><h3>Open source, permanently</h3><p>The code is public and the license keeps it public. Anyone can inspect it, fork it, translate it, or run it after we're gone. A mission this important shouldn't depend on one person's uptime.</p></div></li>
+      <li><span class="k">04</span><div><h3>Honest about what it can measure</h3><p>Body mechanics from a single camera are trustworthy. True bat speed needs more. We'll show our accuracy, cite our ground truth, and never dress an estimate up as a lab reading.</p></div></li>
+      <li><span class="k">05</span><div><h3>The core is never behind a paywall</h3><p>Record a swing, get real feedback — that path stays free for everyone, always. If anything is ever paid, it funds the free tier and sits strictly on top of it.</p></div></li>
+    </ul>
+  </div>
+</section>
+
+<section class="access">
+  <div class="wrap reveal">
+    <p class="eyebrow">The access model</p>
+    <h2>One camera, <em>a whole town.</em></h2>
+    <p class="lead">The last real barrier isn't software — it's a good enough lens. So we don't put one in every home. We put one in the commons.</p>
+    <div class="bignum">
+      <span class="n">1</span>
+      <span class="arrow">→</span>
+      <span class="inf">∞</span>
+      <span class="cap">One checked-out action camera serves every kid who walks into the building.</span>
+    </div>
+    <p class="muted">A single high-frame-rate camera — the one piece of hardware that meaningfully lifts quality — is a one-time purchase, not a per-child expense. Picture it living at the public library, checked out like a book: a family borrows the camera for the weekend, films at the cage or in the backyard, and Sandlot does the rest on their own phone for free. The library buys one; the community shares it forever.</p>
+    <p>That's the whole thesis of accessibility in one image. The expensive part becomes a shared public good, the free part runs on the phone in your pocket, and the price of entry for a kid drops to a library card.</p>
+  </div>
+</section>
+
+<section class="divider">
+  <div class="wrap reveal">
+    <p class="eyebrow">What it does</p>
+    <h2>It watches a swing the way a good coach does — then says the one thing that matters.</h2>
+    <p class="muted">Under the hood it's a pipeline. To the kid, it's a coach who never gets tired, never charges, and always explains why.</p>
+    <div class="flow">
+      <div class="step"><span class="idx">→</span><div><h3>Sees the body</h3><p>An open pose model finds the joints in every frame and tracks them through the swing — the same skeleton the pros pay a lab to capture.<span class="tag">on-device · open source</span></p></div></div>
+      <div class="step"><span class="idx">→</span><div><h3>Finds the moments</h3><p>It automatically splits the swing into its phases — load, stride, launch, contact, finish — so feedback can point at exactly when something goes wrong.<span class="tag">phase detection</span></p></div></div>
+      <div class="step"><span class="idx">→</span><div><h3>Measures the sequence</h3><p>It checks the order power flows through the body — hips, then torso, then hands — and how the swing stacks up against a library of strong, healthy swings.<span class="tag">kinematic sequence</span></p></div></div>
+      <div class="step"><span class="idx">→</span><div><h3>Finds the cause, not the symptom</h3><p>Weak contact is a symptom. Rotating the torso before the hips is a cause. Sandlot traces the fault upstream and picks the single highest-leverage fix.<span class="tag">root-cause</span></p></div></div>
+      <div class="step"><span class="idx">→</span><div><h3>Coaches in plain words</h3><p>The finding becomes one clear cue and one drill — grounded strictly in what was measured, phrased for a twelve-year-old, not a biomechanist.<span class="tag">feedback</span></p></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="divider">
+  <div class="wrap reveal">
+    <p class="eyebrow">The swing, in phases</p>
+    <h2>Every swing is a sequence. So is the analysis.</h2>
+    <p class="muted">Power is built in order, from the ground up. Sandlot reads each phase against what a strong, healthy swing looks like — and localizes the fault to the exact moment it happens.</p>
+    <div class="phases">
+      <div class="phase"><span class="num">01</span><div><h4>Stance</h4><p>Balance, posture, and a stable spine angle — the platform everything else is built on.</p></div></div>
+      <div class="phase"><span class="num">02</span><div><h4>Load</h4><p>Weight gathers back, hands set, head stays quiet. Energy is stored, not leaked.</p></div></div>
+      <div class="phase"><span class="num">03</span><div><h4>Stride</h4><p>A short, controlled step toward the pitch. Timing to foot-plant and a still head.</p></div></div>
+      <div class="phase"><span class="num">04</span><div><h4>Launch</h4><p>Hip–shoulder separation peaks and the hips fire first — the signature of real power.</p></div></div>
+      <div class="phase"><span class="num">05</span><div><h4>Contact</h4><p>The chain arrives in order against a braced front leg. This is where the sequence pays off.</p></div></div>
+      <div class="phase"><span class="num">06</span><div><h4>Finish</h4><p>Full rotation, balanced. A clean follow-through is evidence the swing was efficient.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="divider">
+  <div class="wrap reveal">
+    <p class="eyebrow">The horizon</p>
+    <h2>Start with the swing. Build a <em>commons.</em></h2>
+    <p>Baseball is the first swing, not the last — the same skeleton and sequence logic extends to softball, then to any sport where a body moves through a pattern. Beyond the app, the real prize is an open, community-owned library of drills and reference movement that improves every time someone contributes to it.</p>
+    <p class="muted">And here's the quiet advantage of doing this in the open, for free: the best public biomechanics datasets are licensed for exactly this — non-commercial, community, youth-development use. A predatory for-profit legally can't build on them the way we can. The mission isn't a constraint on the project. It's the moat.</p>
+  </div>
+</section>
+
+<section class="divider">
+  <div class="wrap reveal">
+    <p class="eyebrow">A line in the chalk</p>
+    <h2>What Sandlot will never be.</h2>
+    <ul class="never">
+      <li><span class="x">✕</span><div><span class="t"><b>A subscription.</b></span><small>The core loop — record a swing, get real feedback — is free for every kid, every season, forever.</small></div></li>
+      <li><span class="x">✕</span><div><span class="t"><b>A harvester of children's data.</b></span><small>Analysis runs on-device precisely so a minor's video never has to be uploaded or sold to anyone.</small></div></li>
+      <li><span class="x">✕</span><div><span class="t"><b>A gatekeeper.</b></span><small>No academy affiliation, no coach's login, no gear requirement stands between a kid and their own swing.</small></div></li>
+      <li><span class="x">✕</span><div><span class="t"><b>Snake oil.</b></span><small>We measure what a camera can honestly measure, show the accuracy, and say so when it's an estimate.</small></div></li>
+    </ul>
+  </div>
+</section>
+
+<section class="divider close">
+  <div class="wrap reveal">
+    <p class="eyebrow">The invitation</p>
+    <h2>Build it with me.</h2>
+    <p class="lead">If you coach, if you code, if you run a rec league or a library branch — there's a piece of this with your name on it. The technology is finally cheap enough. The only thing missing is the will to give it away.</p>
+    <p class="muted">Every kid with a swing and a phone deserves to know why it works. Let's make that the default, not the privilege.</p>
+    <p class="cta-note">Status: vision, pre-code. "Sandlot" is a working name. First milestone is small and honest — a single video in, a skeleton and a swing-sequence read out. Feedback comes next. Nothing here requires a server, a sensor, or a subscription to be true.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>Sandlot — swing analysis for everybody's kid</span>
+    <span>Open source · On-device · $0</span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var canvas = document.getElementById('swing');
+  if (!canvas) return;
+  var ctx = canvas.getContext('2d');
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // read accent colors from CSS tokens
+  function tok(name, fallback) {
+    var v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    return v || fallback;
+  }
+
+  var W = 0, H = 0, DPR = 1;
+  function resize() {
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = canvas.clientWidth; H = canvas.clientHeight;
+    canvas.width = Math.round(W * DPR);
+    canvas.height = Math.round(H * DPR);
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  }
+
+  // Side-on batter keyframes. Local coords: x toward pitcher (+right), y down.
+  // Joints: head, neck, pelvis, kneeB, ankleB, kneeF, ankleF, shoulder, elbow, hands, batTip
+  var P = [
+    { // 0 load
+      head:[-0.03,-0.42], neck:[-0.02,-0.30], pelvis:[0.00,0.00],
+      kneeB:[-0.14,0.22], ankleB:[-0.18,0.45], kneeF:[0.14,0.20], ankleF:[0.20,0.45],
+      shoulder:[-0.02,-0.28], elbow:[-0.16,-0.20], hands:[-0.18,-0.34], batTip:[-0.32,-0.56]
+    },
+    { // 1 stride
+      head:[-0.01,-0.42], neck:[0.00,-0.30], pelvis:[0.02,0.00],
+      kneeB:[-0.10,0.24], ankleB:[-0.16,0.45], kneeF:[0.20,0.16], ankleF:[0.30,0.45],
+      shoulder:[0.00,-0.28], elbow:[-0.12,-0.18], hands:[-0.14,-0.30], batTip:[-0.30,-0.52]
+    },
+    { // 2 contact
+      head:[0.05,-0.42], neck:[0.04,-0.30], pelvis:[0.04,0.00],
+      kneeB:[-0.06,0.24], ankleB:[-0.12,0.45], kneeF:[0.22,0.10], ankleF:[0.30,0.45],
+      shoulder:[0.05,-0.28], elbow:[0.20,-0.24], hands:[0.34,-0.20], batTip:[0.64,-0.14]
+    },
+    { // 3 finish
+      head:[0.07,-0.40], neck:[0.05,-0.30], pelvis:[0.03,0.00],
+      kneeB:[-0.04,0.24], ankleB:[-0.10,0.45], kneeF:[0.20,0.10], ankleF:[0.28,0.45],
+      shoulder:[0.06,-0.28], elbow:[0.10,-0.34], hands:[-0.02,-0.40], batTip:[-0.22,-0.30]
+    }
+  ];
+  var JOINTS = ['head','neck','pelvis','kneeB','ankleB','kneeF','ankleF','shoulder','elbow','hands','batTip'];
+  var BONES = [
+    ['head','neck'],['neck','pelvis'],
+    ['pelvis','kneeB'],['kneeB','ankleB'],
+    ['pelvis','kneeF'],['kneeF','ankleF'],
+    ['neck','shoulder'],['shoulder','elbow'],['elbow','hands']
+  ];
+
+  function lerp(a,b,t){ return a+(b-a)*t; }
+  function ease(t){ return t<0.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2; }
+
+  function poseAt(t) {
+    // t in [0,4): segment between keyframes, with a hold at contact
+    var seg = Math.floor(t) % 4;
+    var next = (seg + 1) % 4;
+    var f = ease(t - Math.floor(t));
+    var out = {};
+    for (var i=0;i<JOINTS.length;i++){
+      var j = JOINTS[i];
+      out[j] = [ lerp(P[seg][j][0], P[next][j][0], f), lerp(P[seg][j][1], P[next][j][1], f) ];
+    }
+    return out;
+  }
+
+  var trail = [];
+  var start = null;
+
+  function map(pt, cx, cy, s) { return [ cx + pt[0]*s, cy + pt[1]*s ]; }
+
+  function draw(ts) {
+    if (start === null) start = ts;
+    var elapsed = (ts - start) / 1000;
+    // full cycle ~7.5s with pauses; contact is keyframe index 2
+    var cycle = 7.5;
+    var phase = (elapsed % cycle) / cycle; // 0..1
+    // stretch phases: give contact a brief hold
+    var t;
+    if (reduce) { t = 2; } // static contact frame
+    else {
+      // map phase 0..1 across 4 segments (loop back 3->0)
+      t = phase * 4;
+    }
+
+    var pose = poseAt(t);
+
+    var mint = tok('--mint', '#74E0B4');
+    var clay = tok('--clay', '#D9814E');
+    var line = tok('--line', '#24312A');
+
+    ctx.clearRect(0,0,W,H);
+
+    var cx = W * 0.42;
+    var cy = H * 0.46;
+    var s = Math.min(W, H) * 0.72;
+
+    // faint ground line
+    ctx.strokeStyle = line;
+    ctx.globalAlpha = 0.6;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    var gy = cy + 0.45*s + 6;
+    ctx.moveTo(cx - s*0.5, gy); ctx.lineTo(cx + s*0.7, gy);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+
+    // bat-tip trail
+    var tip = map(pose.batTip, cx, cy, s);
+    if (!reduce) {
+      trail.push(tip);
+      if (trail.length > 22) trail.shift();
+    }
+    for (var k=0;k<trail.length;k++){
+      var a = k/trail.length;
+      ctx.beginPath();
+      ctx.fillStyle = clay;
+      ctx.globalAlpha = a*0.5;
+      ctx.arc(trail[k][0], trail[k][1], 1.6 + a*1.6, 0, Math.PI*2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    // hip separation arc (measurement flourish)
+    var pel = map(pose.pelvis, cx, cy, s);
+    ctx.strokeStyle = mint;
+    ctx.globalAlpha = 0.45;
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.arc(pel[0], pel[1], 22, -0.5, 0.9 + Math.sin(ts/700)*0.15);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+
+    // bones
+    ctx.strokeStyle = mint;
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.globalAlpha = 0.85;
+    for (var b=0;b<BONES.length;b++){
+      var p1 = map(pose[BONES[b][0]], cx, cy, s);
+      var p2 = map(pose[BONES[b][1]], cx, cy, s);
+      ctx.beginPath(); ctx.moveTo(p1[0],p1[1]); ctx.lineTo(p2[0],p2[1]); ctx.stroke();
+    }
+
+    // bat
+    var hands = map(pose.hands, cx, cy, s);
+    ctx.strokeStyle = clay;
+    ctx.lineWidth = 3;
+    ctx.globalAlpha = 0.95;
+    ctx.beginPath(); ctx.moveTo(hands[0],hands[1]); ctx.lineTo(tip[0],tip[1]); ctx.stroke();
+    ctx.globalAlpha = 1;
+
+    // joints
+    for (var i=0;i<JOINTS.length;i++){
+      if (JOINTS[i]==='batTip') continue;
+      var pp = map(pose[JOINTS[i]], cx, cy, s);
+      ctx.beginPath();
+      ctx.fillStyle = mint;
+      ctx.arc(pp[0], pp[1], JOINTS[i]==='head' ? 5 : 3, 0, Math.PI*2);
+      ctx.fill();
+      // hollow ring
+      ctx.beginPath();
+      ctx.strokeStyle = mint;
+      ctx.globalAlpha = 0.35;
+      ctx.lineWidth = 1;
+      ctx.arc(pp[0], pp[1], JOINTS[i]==='head' ? 9 : 6, 0, Math.PI*2);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+
+    if (!reduce) requestAnimationFrame(draw);
+  }
+
+  resize();
+  window.addEventListener('resize', function(){ resize(); trail = []; });
+  requestAnimationFrame(draw);
+})();
+</script>
