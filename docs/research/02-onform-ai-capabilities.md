@@ -39,7 +39,10 @@ still a coaching/telestration + messaging workflow. Notably, OnForm built the 3D
 - Auto-computed metrics: **torso rotation, hip/pelvis rotation, forward bend, side bend, pelvis
   lift, torso lift, thrust, sway**.
 - **Built in-house**: OnForm constructed its own motion-capture lab using **OptiTrack**, validated
-  against **electromagnetic (Polhemus EMS)** and **optical marker (Qualisys)** systems.
+  against **electromagnetic (EMS)** and **optical markered** systems. *[VERIFIED 2026-07-09: the
+  cited launch blog says only generic "electromagnetic systems (EMS)" and "optical markered
+  systems" — it does NOT name **Polhemus** or **Qualisys**. Those brand names (in an earlier draft)
+  are unconfirmed by either cited source; the model-card PDF is image-based and not text-extractable.]*
 - Claims to be "the first markerless motion capture app to publish a complete model card"
   (published Sept 30, 2025; updated April 13, 2026).
   - **Note:** the model card's numeric error/MPJPE figures could not be extracted — the PDFs are
@@ -76,7 +79,7 @@ proprietary in-house tech, no external CV/AI vendor.
 | **OnForm** | Yes | On-device 2D pose + auto joint angles; auto-detect recording; **markerless single-camera 3D w/ 12 auto golf metrics** (Sept 2025); rest is manual telestration. |
 | **Sportsbox AI (3D Golf)** | Yes (pioneer) | Patent-pending single-camera **markerless 3D** golf; 6 view angles; metrics in inches/degrees. The category creator OnForm is cloning. Described as a **measurement tool, not a coaching tool**. https://www.sportsbox.ai/ |
 | **Hudl Technique (ex-Coach's Eye)** | Mostly NO | Primarily **manual slow-mo + telestration**. Separate **Hudl Studio** adds AI player-tracking for telestration graphics (team sports), not biomechanics. |
-| **Dartfish** | Yes | Markerless AI that **auto-tracks joints, bones, angles, trajectories**. https://www.dartfish.com/motion/ |
+| **Dartfish** | Yes (claimed) | Dartfish markets markerless AI motion tracking, but the cited `dartfish.com/motion/` page actually describes **manual** tools (track/trajectory, overlay, StroMotion) — it does **not** substantiate "auto-tracks joints, bones, angles." *[VERIFIED 2026-07-09: the AI-tracking claim needs a different source; the linked page shows manual tooling.]* https://www.dartfish.com/motion/ |
 | **SwingVision** | Yes (heavy) | Single-camera AI for tennis/pickleball: automated scoring, stats, shot tracking, real-time line calls. The most autonomous of the group. https://swing.vision/ |
 | **Uplift Labs** | Yes | Markerless **3D biomechanics** in seconds, single camera, MLB/Driveline-trusted. |
 | **OnBaseU** | N/A | Not a software product — a physical-assessment **certification/education** body. https://www.onbaseu.com/ |

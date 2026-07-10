@@ -44,11 +44,15 @@ that amplifies bat speed. ([Driveline](https://www.drivelinebaseball.com/2019/10
 | Rotational Acceleration | How fast bat accelerates into plane | Higher = explosive |
 | Vertical Bat Angle | Bat tilt vs. horizontal at contact | pairs with attack angle |
 
-**MLB Statcast Bat Tracking** (Hawk-Eye markerless, 12 cameras, 5 @ 300 fps) — camera-derived, no
-bat sensor: **bat speed, swing length, fast-swing rate, squared-up rate, blast rate, attack angle,
-swing path tilt.** Hawk-Eye "tracks not only player center of mass but full limb orientation
-(including the bat)" — a **production markerless system already extracting swing kinematics from
-video**. ([MLB.com](https://www.mlb.com/news/what-you-need-to-know-about-statcast-bat-tracking), [Savant](https://baseballsavant.mlb.com/leaderboard/bat-tracking/swing-path-attack-angle), [Everchem](https://everchem.com/mlb-tech-update/))
+**MLB Statcast Bat Tracking** (Hawk-Eye markerless; the MLB.com article specifies **5
+high-frame-rate cameras**) — camera-derived, no bat sensor: **bat speed, swing length,
+fast-swing rate, squared-up rate, blast rate, attack angle, swing path tilt** (all confirmed on
+MLB.com / Savant). It is a **production markerless system already extracting swing kinematics from
+video**. ([MLB.com](https://www.mlb.com/news/what-you-need-to-know-about-statcast-bat-tracking), [Savant](https://baseballsavant.mlb.com/leaderboard/bat-tracking/swing-path-attack-angle))
+*[VERIFIED note: the "tracks full limb orientation including the bat" phrasing and the "12 cameras"
+figure were previously attributed to a weak third-party repost (everchem.com), which has been
+removed; the MLB.com source confirms the metrics and five high-FPS cameras but not that exact
+quote.]*
 
 **Body-mechanics checkpoints coaches care about:** load/stride mechanics, weight transfer/COM
 shift, **head movement/stability**, **front-leg block/extension**, **posture/spine angle**, hand
@@ -61,6 +65,10 @@ angles to a few degrees; pitching validation reported pelvis/trunk **r²≈0.92,
 is **best in the sagittal plane, worst for transverse-plane rotations**, worst at the elbow.
 Single-camera 2D pose is far less reliable for absolute 3D angles/rotational velocities.
 ([NMU/ISBS](https://commons.nmu.edu/isbs/vol42/iss1/238/), [PITCHAI](https://sportrxiv.org/index.php/server/preprint/view/101))
+*[VERIFIED note: the cited ISBS/NMU abstract supports the "sagittal-best, transverse-worst"
+directionality but does NOT contain the specific "Theia3D r²≈0.92 / RMSE ~6°" figures; those
+numbers come from the broader markerless-validation literature (incl. PITCHAI) and should be
+sourced directly before quoting.]*
 
 | Metric | Video/pose derivable? | Notes |
 |---|---|---|

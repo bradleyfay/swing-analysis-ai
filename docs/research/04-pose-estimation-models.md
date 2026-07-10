@@ -36,7 +36,13 @@ capture** (120–500+ fps), not by the model alone.
 **Critical caveats:**
 - **OpenPose** grants only non-commercial academic use; commercial license is a **non-refundable
   $25,000/year royalty** and terms state it **cannot be used in the field of Sports** —
-  disqualifying. https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/LICENSE
+  disqualifying. **[VERIFIED 2026-07-09 — claim is TRUE but the citation was miscited.** The
+  linked `.../openpose/blob/master/LICENSE` file contains ONLY the academic/non-profit
+  noncommercial terms — no dollar figure, no sports exclusion. The $25k/yr royalty and the
+  "field of Sports" exclusion live on OpenPose's **separate commercial-licensing page** (CMU
+  Flintbox), confirmed via search. The *conclusion* — avoid OpenPose — holds; the evidence link
+  below points only at the noncommercial license.]**
+  https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/LICENSE
 - **Ultralytics YOLO** is AGPL-3.0: any product incorporating it (even as a network service) must
   open-source the entire application, or buy the Enterprise License. https://github.com/ultralytics/ultralytics
 - **VideoPose3D is CC BY-NC 4.0** — non-commercial. Prefer MotionBERT or MHFormer.
@@ -49,7 +55,8 @@ capture** (120–500+ fps), not by the model alone.
 ### MediaPipe / BlazePose GHUM (Google) — Apache-2.0
 - 33 landmarks with per-landmark 3D (metric-scale via GHUM) + `world_landmarks` in meters.
 - Accuracy: heavy ~98.3% / full ~96.6% / lite ~93.8% (Google's own metric). Lower joint-precision
-  than ViTPose/RTMPose on COCO AP.
+  than ViTPose/RTMPose on COCO AP. *[VERIFIED note: these percentages come from Google's BlazePose
+  GHUM model card, not the linked TensorFlow blog, which does not contain them.]*
 - Real-time on phones/web; detector→tracker pipeline can lag/lose pose during ballistic swing
   phases and heavy motion blur; single-person, front-facing bias.
 - Verdict: **best permissive on-device option** with built-in 3D; validate on fast swing footage.
@@ -61,8 +68,10 @@ capture** (120–500+ fps), not by the model alone.
   biomechanics. https://blog.tensorflow.org/2021/05/next-generation-pose-detection-with-movenet-and-tensorflowjs.html
 
 ### OpenPose (CMU) — legally encumbered, AVOID
-- Non-commercial research only; commercial = $25k/yr and **prohibited in Sports**. Superseded on
-  accuracy/speed by RTMPose/RTMO. https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/LICENSE
+- Non-commercial research only; commercial = $25k/yr and **prohibited in Sports** (the dollar
+  figure and sports exclusion are on the commercial-licensing page, not the linked LICENSE file —
+  see the verified caveat in §1). Superseded on accuracy/speed by RTMPose/RTMO.
+  https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/LICENSE
 
 ### ViTPose / ViTPose++ — Apache-2.0 (SOTA accuracy)
 - SOTA top-down keypoints (COCO, MPII, COCO-WholeBody). Large backbones are heavy / not real-time.
@@ -128,7 +137,9 @@ not model quality.
 
 **A. Monocular → 2D pose → 3D lifting (MotionBERT/MHFormer).** Cheapest, consumer-friendly, but
 inherent depth ambiguity: markerless-vs-marker errors **~72–122 mm in-plane, ~146–249 mm in
-depth**, joint-angle errors **~9°** for athletic movements (largest at elbow). Good for
+depth**, joint-angle errors **~9°** for athletic movements (largest at elbow). *[VERIFIED note:
+these specific mm/degree figures are from the Sports Engineering 2024 validation study, whose full
+text is paywalled — treat as reported, not independently confirmed.]* Good for
 coaching/relative comparisons, not research-grade absolute kinematics. Known-bat-length scale
 trick helps recover metric scale.
 

@@ -25,8 +25,10 @@ against user-supplied or generic reference clips, not a gated proprietary librar
 - https://onform.com/ · https://onform.com/sports/golf/ · https://www.techlearning.com/how-to/onform-how-to-use-it-for-school-athletics
 
 **The one exception — a genuine proprietary dataset — is the 3D golf model.** To build/validate
-it OnForm built their own **OptiTrack motion-capture lab** and validated against electromagnetic
-(Polhemus) and optical marker (Qualisys) systems. This ground-truth effort is the closest thing
+it OnForm built their own **OptiTrack motion-capture lab** and validated against **electromagnetic
+(EMS)** and **optical markered** systems. *[VERIFIED 2026-07-09: the cited blog names only generic
+"EMS" and "optical markered systems" — the specific brand names Polhemus/Qualisys (in an earlier
+draft) are unconfirmed by either cited source.]* This ground-truth effort is the closest thing
 to a proprietary moat.
 - https://onform.com/blog/onform-launches-fast-reliable-and-accessible-markerless-3d-motion-capture-for-golf/
 - Model cards (unusually transparent): https://onform.com/wp-content/uploads/2026/04/Onform-3D-Golf-Swing-Pose-Estimation-Model_Apr-13-2026-v2.pdf

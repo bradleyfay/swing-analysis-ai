@@ -76,6 +76,10 @@ real AI plays**, measuring via pose estimation + 3D reconstruction.
   accuracy.
 - **Business:** raised **~$10M**; a **$6M Series A** (Andy Roddick wrote the first $50k check).
   Apple has featured it repeatedly.
+- *[VERIFIED note: the linked Apple Newsroom piece confirms the founders, on-device Neural Engine
+  approach, and Roddick as an investor/advisor, but does NOT contain the funding figures ($10M /
+  $6M Series A / $50k first check) or the training-scale/accuracy numbers (500M shots, 200k
+  players, 97–99%) — those trace to other sources and should be re-confirmed before quoting.]*
 - **Lessons:** (1) on-device inference removes cloud cost/latency and is a differentiator; (2) a
   **data flywheel** (user videos → better models) is the moat; (3) **athlete/celebrity investors**
   double as distribution; (4) single fixed camera + strong CV beats requiring extra hardware.
@@ -84,11 +88,14 @@ real AI plays**, measuring via pose estimation + 3D reconstruction.
 ## 4. Bat tracking from video — the hardest baseball-specific sub-problem, solved at 3 tiers
 
 **Tier 1 — Single camera, buildable (Driveline's public writeup):**
-- **YOLOv8 pose** to track **two bat keypoints: cap (barrel end) + knob (handle)**.
+- **A custom 2-keypoint pose model** to track **cap (barrel end) + knob (handle)**. *[CORRECTED
+  2026-07-09: an earlier draft said "YOLOv8 pose" — the article explicitly took "a different
+  approach" and rejected YOLOv8 in favor of a custom pose model. All other Tier-1 numbers below
+  are confirmed verbatim against the article.]*
 - Bootstrapped from ~1,000 manually-annotated side-view images (~10,000 for the ball via
   **semi-automatic annotation**).
-- **Single side-view camera @ 120fps**; **known bat length as in-frame scale reference** to recover
-  real-world dimensions from 2D.
+- **Single side-view camera** (an Edgertronic high-speed camera); **known bat length as in-frame
+  scale reference** to recover real-world dimensions from 2D.
 - **Motion-blur insight:** even when bounding-box confidence dropped from blur, **keypoint
   predictions stayed accurate** — filter on per-keypoint confidence to salvage frames.
 - **Validation:** ~2.4–2.6 px mean keypoint error, ~10s turnaround. https://www.drivelinebaseball.com/2025/02/bat-tracking-computer-vision-and-the-next-frontier/
@@ -97,22 +104,30 @@ real AI plays**, measuring via pose estimation + 3D reconstruction.
 handle/tip, **<3° bat-plane error** over 2,000+ swings; joints within ~1cm. Needs a rig, not a
 phone. https://www.theiamarkerless.com/blog/markerless-bat-tracking-q-a-for-pro-baseball-performance-staff
 
-**Tier 3 — Infrastructure (MLB Statcast/Hawk-Eye):** 12 cameras (5 @ 300fps). MLB spent **2+ years
-refining the bat-tracking model** before release — a signal of how hard metric-grade bat tracking
-is. https://baseballsavant.mlb.com/leaderboard/bat-tracking
+**Tier 3 — Infrastructure (MLB Statcast/Hawk-Eye):** **5 high-frame-rate cameras** (the cited
+MLB.com article specifies five; Hawk-Eye deploys ~12 cameras total per park, of which the five
+high-FPS units drive bat tracking). MLB spent **2+ years refining the bat-tracking model** before
+release — a signal of how hard metric-grade bat tracking is. https://baseballsavant.mlb.com/leaderboard/bat-tracking
 
 **Open-source building blocks:** **BaseballCV** (Dylan Drummey & Carlos Marcano) — free
 baseball-specific CV models + datasets (pitcher/hitter/catcher detectors, downloadable weights).
-Also a public [Bat-Ball-Tracking YOLOv5 repo](https://github.com/kushaldev75/Bat-Ball-Tracking-System).
 https://github.com/BaseballCV/BaseballCV · https://baseballcv.com/datasets
+*(Note: the previously-listed `kushaldev75/Bat-Ball-Tracking-System` repo is a **cricket** project,
+not baseball — removed here to avoid miscategorization.)*
 
 ## 5. Academic / research foundations
 - **The rotation problem (critical):** pose estimators output **one point per joint**, but swings
   are dominated by **rotational motion** needing **≥2 points per joint**. Solutions: **MeTRAbs**
   (multiple points per joint) and **OpenCap** (LSTM trained on paired 3D-pose + Vicon to infer
   marker positions). *The core technical hurdle for a phone-based swing biomechanics tool.*
+  *[VERIFIED note: the linked PMC12378739 is a real general pose-framework mini-review that
+  supports the out-of-plane/rotation limitation but does NOT itself name MeTRAbs or OpenCap —
+  those specific solutions come from their own primary sources and should be cited directly.]*
   https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12378739/
-- **Single-camera 3D lift validated in literature:** https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10951609/ · https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7739760/
+- **Single-camera 3D lift validated in literature:** https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10951609/
+  (genuine single-camera validation — supports the claim). *[CORRECTED 2026-07-09: PMC7739760 was
+  also cited here but it is a **multi-camera** (5-camera) OpenPose accuracy study — it does NOT
+  validate single-camera lift and was removed to avoid contradicting the claim.]*
 - **Baseball-specific:** "Baseball Action Classification Based on OpenPose"; "Baseball Batting
   Movement Analysis System."
 - **3D biomech from a SINGLE broadcast angle:** Baseball Prospectus extracted **3D MLB biomech data

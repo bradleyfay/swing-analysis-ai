@@ -17,9 +17,12 @@ records a voiceover, and sends it back. This is the same "telestration + voice f
 paradigm as the old V1 Golf / Coach's Eye / CoachNow category. The genuinely automated pieces
 are three narrower AI features — **skeleton-tracking overlay**, **auto-detect recording**, and
 (golf-only) **markerless 3D motion capture** — which augment but do not replace the coach's
-manual interpretation. OnForm's own competitive marketing notably avoids claiming automated
-analysis and instead emphasizes manual annotation tools and convenience automation
-([onform.com competitor blog](https://onform.com/blog/onform-vs-v1-coachnow-and-sportsbox-the-best-video-analysis-tool-for-coaches/)).
+manual interpretation. *[VERIFIED 2026-07-09: an earlier draft claimed OnForm's marketing "notably
+avoids claiming automated analysis" — this is inaccurate. The cited competitor blog actively
+promotes auto-detect recording, 3D data, and club tracking. The accurate statement is that the
+manual telestration + voiceover workflow remains the product's core, with automated features
+layered on top — not that OnForm downplays automation.]*
+([onform.com competitor blog](https://onform.com/blog/onform-vs-v1-coachnow-and-sportsbox-the-best-video-analysis-tool-for-coaches/))
 
 ## 1. Complete feature set
 
@@ -67,8 +70,12 @@ corrective instruction — the software surfaces data/visuals; the human coach i
 
 ## 2. The coaching workflow ([iOS user guide](https://support.onform.com/article/153-user-guide-onform-video-analysis-app))
 
-The KB describes the blend explicitly as **"semi-automated: AI handles detection and skeleton
-computation, but coaches manually apply drawings, voiceovers, and interpretation."** Typical loop:
+The workflow is best characterized as **semi-automated: AI handles detection and skeleton
+computation, but coaches manually apply drawings, voiceovers, and interpretation.** *[VERIFIED
+2026-07-09: this sentence was previously presented in quotation marks as if quoting OnForm's KB —
+it is not a direct OnForm quote but this analysis's own synthesis. The characterization is
+supported by the KB's descriptions of the individual tools; the quotation marks were the error.]*
+Typical loop:
 1. Record (choosing a mode) or receive an athlete-uploaded video.
 2. Scrub frame-by-frame / slow-mo.
 3. Manually draw; optionally toggle skeleton overlay or (golf) 3D model.
